@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "security",
+      "id": "001-security-cve-remediation",
+      "description": "Scan all project dependencies for known CVEs and remediate any identified vulnerabilities to ensure the application is secure before deployment.",
+      "reason": "The project uses older versions of Jersey, Jackson, and other libraries that may carry known CVEs. Remediating these ensures a secure foundation for modernization.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, the current version, the upgraded major version, and the breaking change risk. Verify that the project builds and all tests pass after remediation.",
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      },
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ]
+    },
+    {
+      "type": "deployment",
+      "id": "002-deployment-azure-container-apps",
+      "description": "Containerize the docraptor-java application and deploy it to Azure Container Apps.",
+      "reason": "Moving to Azure Container Apps provides scalable, managed container hosting with Managed Identity support.",
+      "requirements": "Create a Dockerfile for the Java application. Deploy to Azure Container Apps using Managed Identity for authentication. Use Bicep for infrastructure provisioning.",
+      "dependencies": [
+        "001-security-cve-remediation"
+      ],
+      "targetAzureService": "azurecontainerapp",
+      "resourceStatus": "Create new Azure Container Apps resource",
+      "deploymentTool": "bicep",
+      "skills": [
+        {
+          "name": "azcli-containerapp-deploy",
+          "location": "builtin"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "planName": "modnization-plan",
+    "projectName": "docraptor-java",
+    "language": "java",
+    "createdAt": "2026-08-06T13:07:38.413Z",
+    "version": "1.0"
+  }
+}
