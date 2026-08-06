@@ -1,0 +1,48 @@
+{
+  "GeneratedAt": "2026-08-06T11:27:38.0000000Z",
+  "ProjectPath": ".",
+  "Summary": {
+    "TotalFindings": 2,
+    "CveCount": 0,
+    "CweCount": 2,
+    "BySeverity": {
+      "mandatory": 0,
+      "optional": 0,
+      "potential": 2
+    },
+    "ByCategory": {
+      "Concurrency & Synchronization": 2
+    },
+    "TotalRulesAssessed": 59,
+    "RulesPassed": 57
+  },
+  "CveFindings": [],
+  "CweFindings": [
+    {
+      "Id": "CWE-543",
+      "Name": "Use of Singleton Pattern Without Synchronization in a Multithreaded Context",
+      "Category": "Concurrency & Synchronization",
+      "Severity": "potential",
+      "StoryPoint": 5,
+      "Description": "The product uses the singleton pattern when creating a resource within a multithreaded environment.",
+      "Files": [
+        "src/main/java/com/docraptor/Configuration.java:18",
+        "src/main/java/com/docraptor/Configuration.java:36"
+      ],
+      "Explanation": "Configuration keeps a static singleton-like ApiClient (`defaultApiClient`) and exposes unsynchronized global getter/setter methods. Concurrent callers can replace/read this shared mutable instance without synchronization or volatile semantics."
+    },
+    {
+      "Id": "CWE-567",
+      "Name": "Unsynchronized Access to Shared Data in a Multithreaded Context",
+      "Category": "Concurrency & Synchronization",
+      "Severity": "potential",
+      "StoryPoint": 5,
+      "Description": "The product does not properly synchronize shared data, such as static variables across threads, which can lead to undefined behavior and unpredictable data changes.",
+      "Files": [
+        "src/main/java/com/docraptor/Configuration.java:18",
+        "src/main/java/com/docraptor/Configuration.java:37"
+      ],
+      "Explanation": "`defaultApiClient` is shared static state updated through `setDefaultApiClient` and read from `getDefaultApiClient` without synchronization primitives, allowing race-prone global mutation."
+    }
+  ]
+}

@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assessment - docraptor</title>
+<style>
+:root {
+  --bg-primary: #ffffff;
+  --bg-card: #f8f9fa;
+  --bg-page: #f0f1f3;
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --text-muted: #6b7280;
+  --border-color: #d0d7de;
+  --border-light: #e1e4e8;
+  --link-color: #2563eb;
+  --color-mandatory: #E3008C;
+  --color-potential: #637CEF;
+  --color-optional: #A19F9D;
+  --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-family); font-size: 13px; color: var(--text-primary); background: var(--bg-primary); line-height: 1.5; margin: 0; padding: 0; }
+a { color: var(--link-color); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Page layout ───────────────────────────────────────────── */
+.main { margin: 0; padding: 24px 32px; background: var(--bg-primary); }
+.back-link { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; display: block; }
+h1 { font-weight: 600; font-size: 20px; color: var(--text-primary); margin-bottom: 20px; }
+
+/* ── Report cards (matches VS Code .vscode-report-card) ──── */
+.report-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 4px; padding: 12px; margin-bottom: 20px; }
+.report-card h2 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text-primary); }
+.report-card-body { margin-top: 16px; }
+
+/* ── Component Information (two-column) ────────────────── */
+.app-info-container { display: flex; gap: 8px; flex-wrap: wrap; }
+.app-info-column { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px; }
+.app-info-row { display: flex; align-items: baseline; }
+.app-info-label { width: 136px; flex-shrink: 0; font-weight: 600; color: var(--text-primary); }
+.app-info-value { flex: 1; color: var(--text-primary); }
+
+/* ── Issue Summary (pie charts + legend) ─────────────────── */
+.cards-container { display: flex; align-items: stretch; gap: 20px; flex-wrap: wrap; }
+.issue-summary-card { flex: 2; }
+.domain-summary-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around; }
+.domain-summary-item { flex: 1; min-width: 120px; text-align: center; padding: 0 16px; border-right: 1px solid var(--border-light); }
+.domain-summary-item:last-child { border-right: none; }
+.domain-summary-item h3 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 8px; }
+.domain-summary-item .count { font-size: 12px; color: var(--text-secondary); }
+.criticality-legend { display: flex; flex-wrap: wrap; gap: 15px; padding-top: 12px; justify-content: center; }
+.criticality-legend .legend-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+.legend-swatch { display: inline-block; width: 1em; height: 1em; border-radius: 2px; }
+
+/* ── Issue list tables ───────────────────────────────────── */
+.issue-section { margin-top: 20px; }
+.issue-section h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.issue-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 600px; }
+.issue-table th { text-align: left; text-transform: uppercase; font-weight: 600; font-size: calc(13px * 0.875); padding: 6px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); color: var(--text-secondary); position: sticky; top: 0; z-index: 1; }
+.issue-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+.col-issue { width: 55%; }
+.col-criticality { width: 25%; }
+.col-storypoint { width: 20%; }
+
+/* ── Target dropdown ─────────────────────────────────────── */
+.target-select-container { margin: 4px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+.target-select-container label { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+.target-select-container select { font-family: var(--font-family); font-size: 13px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); cursor: pointer; }
+
+/* ── Filter bar ──────────────────────────────────────────── */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0 8px 0; align-items: center; }
+.multi-select { position: relative; display: inline-block; min-width: 140px; }
+.multi-select-btn { font-family: var(--font-family); font-size: 13px; padding: 4px 24px 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); cursor: pointer; width: 100%; text-align: left; position: relative; white-space: nowrap; }
+.multi-select-btn::after { content: '\25BE'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-secondary); }
+.multi-select-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; margin-top: 2px; }
+.multi-select.open .multi-select-dropdown { display: block; }
+.multi-select-option { display: flex; align-items: center; gap: 6px; padding: 5px 10px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.multi-select-option:hover { background: var(--bg-secondary); }
+.multi-select-option input[type=checkbox] { margin: 0; cursor: pointer; }
+.clear-filters { font-size: 12px; color: var(--link-color); cursor: pointer; margin-left: 4px; }
+
+/* ── Criticality labels (colored square + text) ──────────── */
+.crit-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
+.crit-square { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.crit-square-mandatory { background: var(--color-mandatory); }
+.crit-square-potential { background: var(--color-potential); }
+.crit-square-optional { background: var(--color-optional); }
+
+/* ── Expandable rows ─────────────────────────────────────── */
+.expand-btn { background: none; border: none; cursor: pointer; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; transition: transform 0.15s; padding: 0; vertical-align: middle; flex-shrink: 0; }
+.expand-btn.open { transform: rotate(90deg); }
+.issue-title-cell { display: flex; align-items: center; gap: 4px; }
+.detail-row td { padding: 0; border-bottom: 1px solid var(--border-light); white-space: normal; overflow: visible; text-overflow: clip; }
+.detail-content { display: flex; gap: 0; padding: 8px 8px 8px 32px; min-width: 0; }
+.file-list { flex: 0 0 50%; min-width: 0; overflow: hidden; }
+.file-list table { width: 100%; border-collapse: collapse; }
+.file-list th { font-size: calc(13px * 0.875); text-transform: uppercase; font-weight: 600; color: var(--text-secondary); padding: 6px 8px; border-bottom: 1px solid var(--border-color); text-align: left; height: 32px; }
+.file-list td { font-size: 13px; padding: 6px 8px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); }
+.file-list .file-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; display: block; }
+.file-list .position { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+.explanation-panel { flex: 1; padding-left: 16px; min-width: 0; overflow-wrap: break-word; word-wrap: break-word; }
+.explanation-panel h4 { font-size: calc(13px * 0.875); text-transform: uppercase; font-weight: 600; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border-color); height: 32px; margin: 0; }
+.explanation-panel p { font-size: 13px; padding: 8px 0; color: var(--text-primary); line-height: 1.6; white-space: normal; word-break: break-word; }
+
+/* ── Experimental badge ──────────────────────────────────── */
+.badge-experimental { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #fef9c3; color: #854d0e; vertical-align: middle; margin-left: 8px; cursor: default; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 13px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .main { padding: 16px; }
+  .app-info-container { flex-direction: column; }
+  .domain-summary-container { flex-direction: column; }
+  .domain-summary-item { border-right: none; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+  .detail-content { flex-direction: column; }
+  .file-list { flex: none; width: 100%; }
+  .explanation-panel { padding-left: 0; padding-top: 8px; }
+}
+/* ── Tab navigation ──────────────────────────────────────── */
+.tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border-color); margin-bottom: 28px; flex-wrap: wrap; }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 18px; font-size: 13px; font-family: var(--font-family); color: var(--text-secondary); cursor: pointer; margin-bottom: -1px; white-space: nowrap; position: relative; }
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active { color: var(--link-color); border-bottom-color: var(--link-color); font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Tooltip on tab ──────────────────────────────────────── */
+.tab-btn[data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #24292f; color: #ffffff; font-size: 12px; font-weight: 400; padding: 6px 10px; border-radius: 4px; white-space: normal; width: max-content; max-width: 260px; text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
+.tab-btn[data-tooltip]:hover::after { opacity: 1; }
+
+/* ── Fact content — prose column ─────────────────────────── */
+.fact-content { max-width: 860px; margin: 0 auto; line-height: 1.75; color: var(--text-primary); font-size: 14px; }
+.fact-content h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px 0; color: var(--text-primary); letter-spacing: -0.01em; }
+.fact-content h1 + p { margin-top: 6px; color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+.fact-content h2 { font-size: 17px; font-weight: 700; margin: 36px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); letter-spacing: -0.01em; }
+.fact-content h3 { font-size: 14px; font-weight: 700; margin: 24px 0 8px 0; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em; font-size: 12px; color: var(--text-secondary); }
+.fact-content p { margin: 10px 0; color: var(--text-primary); }
+.fact-content ul, .fact-content ol { margin: 10px 0 10px 22px; }
+.fact-content li { margin: 5px 0; }
+.fact-content a { color: var(--link-color); }
+.fact-content a:hover { text-decoration: underline; }
+
+/* ── Fact tables ─────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.fact-content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
+.fact-content thead { background: var(--bg-card); }
+.fact-content th { text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+.fact-content td { padding: 9px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-primary); }
+.fact-content tr:last-child td { border-bottom: none; }
+.fact-content tbody tr:hover { background: #f6f8fa; }
+
+/* ── Fact code ───────────────────────────────────────────── */
+.fact-content code { font-family: var(--font-mono); font-size: 12px; background: #f0f1f3; padding: 2px 6px; border-radius: 4px; color: #c7254e; }
+.fact-content pre { background: #f6f8fa; border: 1px solid var(--border-light); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 14px 0; }
+.fact-content pre code { background: none; color: var(--text-primary); padding: 0; border-radius: 0; }
+.fact-content hr { border: none; border-top: 1px solid var(--border-light); margin: 28px 0; }
+.fact-content strong { font-weight: 600; }
+.fact-content em { font-style: italic; }
+.fact-content blockquote { border-left: 3px solid var(--border-color); margin: 12px 0; padding: 4px 16px; color: var(--text-secondary); }
+.fact-unavailable { padding: 32px 0; }
+.fact-unavailable h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; margin: 0 0 12px 0; }
+.fact-unavailable p { margin: 0 0 8px 0; color: var(--text-secondary); }
+.fact-unavailable ol, .fact-unavailable ul { margin: 0 0 0 22px; color: var(--text-primary); }
+.fact-unavailable li { margin: 6px 0; }
+
+/* ── Mermaid diagram card ─────────────────────────────────── */
+.mermaid { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 24px 16px; margin: 20px 0; overflow-x: auto; text-align: center; cursor: pointer; position: relative; }
+.mermaid:hover { border-color: var(--border-color); }
+.mermaid svg { max-width: 100%; height: auto !important; display: inline-block; }
+.mermaid-zoom-hint { position: absolute; top: 8px; right: 10px; font-size: 11px; color: var(--text-muted); opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+.mermaid:hover .mermaid-zoom-hint { opacity: 1; }
+
+/* ── Diagram lightbox ────────────────────────────────────── */
+.diagram-lightbox { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; cursor: zoom-out; padding: 48px 32px; }
+.diagram-lightbox.open { display: flex; }
+.diagram-lightbox-inner { background: #ffffff; border-radius: 10px; padding: 32px; width: 88vw; max-height: 88vh; overflow: hidden; cursor: default; box-shadow: 0 24px 64px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; }
+.diagram-lightbox-inner svg { width: 100% !important; height: auto !important; max-height: 76vh; display: block; }
+.diagram-lightbox-close { position: fixed; top: 20px; right: 24px; background: #ffffff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1001; }
+.diagram-lightbox-close:hover { background: var(--bg-card); }
+.diagram-lightbox-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #ffffff; font-size: 12px; padding: 6px 14px; border-radius: 20px; pointer-events: none; white-space: nowrap; z-index: 1001; }
+</style>
+<script>
+window.__mermaidPending = [];
+window.__mermaidReady = false;
+window.__renderMermaidIn = function(container) {
+  if (container) { window.__mermaidPending.push(container); }
+};
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { useMaxWidth: true }, sequence: { useMaxWidth: true } });
+
+window.__renderMermaidIn = function(container) {
+  var nodes = container ? container.querySelectorAll('.mermaid:not([data-processed])') : [];
+  if (nodes.length > 0) {
+    mermaid.run({ nodes: Array.from(nodes) }).then(function() {
+      nodes.forEach(function(node) {
+        if (!node.querySelector('.mermaid-zoom-hint')) {
+          var hint = document.createElement('span');
+          hint.className = 'mermaid-zoom-hint';
+          hint.textContent = 'Click to expand';
+          node.appendChild(hint);
+        }
+      });
+    });
+  }
+};
+
+var drained = new Set();
+(window.__mermaidPending || []).forEach(function(c) {
+  if (!drained.has(c)) { drained.add(c); window.__renderMermaidIn(c); }
+});
+window.__mermaidPending = [];
+window.__mermaidReady = true;
+
+function renderActivePanels() {
+  document.querySelectorAll('.tab-panel.active').forEach(function(p) {
+    if (!drained.has(p)) { drained.add(p); window.__renderMermaidIn(p); }
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderActivePanels);
+} else {
+  renderActivePanels();
+}
+</script>
+</head><body>
+<div id="diagram-lightbox" class="diagram-lightbox" role="dialog" aria-modal="true">
+  <button class="diagram-lightbox-close" id="diagram-lightbox-close" aria-label="Close">&#x2715;</button>
+  <div class="diagram-lightbox-hint">Scroll to zoom &nbsp;&middot;&nbsp; Drag to pan &nbsp;&middot;&nbsp; Double-click to reset</div>
+  <div class="diagram-lightbox-inner" id="diagram-lightbox-inner"></div>
+</div>
+<div class="main">
+<h1>docraptor</h1>
+<div class="report-card">
+  <h2>Component Information</h2>
+  <div class="report-card-body">
+    <div class="app-info-container">
+      <div class="app-info-column">
+        <div class="app-info-row"><span class="app-info-label">Component Name</span><span class="app-info-value">docraptor</span></div>
+        <div class="app-info-row"><span class="app-info-label">Java Version</span><span class="app-info-value">1.8</span></div>
+        <div class="app-info-row"><span class="app-info-label">Effort</span><span class="app-info-value" id="effort-display">M (total story points: 21)</span></div>
+      </div>
+      <div class="app-info-column">
+        <div class="app-info-row"><span class="app-info-label">Build Tools</span><span class="app-info-value">Gradle, Maven</span></div>
+        <div class="app-info-row"><span class="app-info-label">Frameworks</span><span class="app-info-value">N/A</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="tab-issues" data-tooltip="Issues detected in the source code">Issues</button>
+  <button class="tab-btn" data-tab="tab-arch" data-tooltip="How the app&#x27;s layers connect — from UI to data.">Architecture</button>
+  <button class="tab-btn" data-tab="tab-api" data-tooltip="Endpoints exposed by this app and how services communicate.">API Contracts</button>
+  <button class="tab-btn" data-tab="tab-config" data-tooltip="Environment settings, runtime profiles, and deployment manifests.">Configuration</button>
+  <button class="tab-btn" data-tab="tab-workflows" data-tooltip="Domain entities and the core flows users move through.">Business Workflows</button>
+  <button class="tab-btn" data-tab="tab-deps" data-tooltip="Libraries and frameworks this app depends on, grouped by category.">Dependencies</button>
+  <button class="tab-btn" data-tab="tab-data" data-tooltip="Database schema, entity relationships, and persistence behavior.">Data Model</button>
+</nav>
+<div id="tab-issues" class="tab-panel active">
+<div class="target-select-container">
+  <label for="target-select">Target Compute Service:</label>
+  <select id="target-select" onchange="onTargetChange(this.value)">
+    <option value="azure-appservice">Azure App Service</option>
+    <option value="azure-aks">Azure Kubernetes Service</option>
+    <option value="azure-container-apps">Azure Container Apps</option>
+  </select>
+</div>
+<div class="report-card">
+  <h2>Issue Summary</h2>
+  <div class="report-card-body">
+    <div class="domain-summary-container" id="donut-container">
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-mandatory)" stroke-width="15" stroke-dasharray="219.91 219.91" stroke-dashoffset="-0.00"/>
+</svg>
+
+        <h3>Cloud Readiness</h3>
+        <div class="count">1 issue</div>
+      </div>
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-mandatory)" stroke-width="15" stroke-dasharray="219.91 219.91" stroke-dashoffset="-0.00"/>
+</svg>
+
+        <h3>Java Upgrade</h3>
+        <div class="count">1 issue</div>
+      </div>
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-potential)" stroke-width="15" stroke-dasharray="219.91 219.91" stroke-dashoffset="-0.00"/>
+</svg>
+
+        <h3>Security</h3>
+        <div class="count">2 issues</div>
+      </div>
+    </div>
+    <div class="criticality-legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-mandatory)"></span>Mandatory</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-potential)"></span>Potential</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-optional)"></span>Optional</div>
+    </div>
+  </div>
+</div>
+<div class="filter-bar" id="filter-bar">
+  <div class="multi-select" id="domain-ms">
+    <button class="multi-select-btn" onclick="toggleMultiSelect('domain-ms')">Domain</button>
+    <div class="multi-select-dropdown">
+      <label class="multi-select-option"><input type="checkbox" value="cloud-readiness" onchange="onMultiSelectChange('domain-ms','Domain')"/> Cloud Readiness</label>
+      <label class="multi-select-option"><input type="checkbox" value="java-upgrade" onchange="onMultiSelectChange('domain-ms','Domain')"/> Java Upgrade</label>
+      <label class="multi-select-option"><input type="checkbox" value="security" onchange="onMultiSelectChange('domain-ms','Domain')"/> Security</label>
+    </div>
+  </div>
+  <div class="multi-select" id="criticality-ms">
+    <button class="multi-select-btn" onclick="toggleMultiSelect('criticality-ms')">Criticality</button>
+    <div class="multi-select-dropdown">
+      <label class="multi-select-option"><input type="checkbox" value="mandatory" onchange="onMultiSelectChange('criticality-ms','Criticality')"/> Mandatory</label>
+      <label class="multi-select-option"><input type="checkbox" value="potential" onchange="onMultiSelectChange('criticality-ms','Criticality')"/> Potential</label>
+    </div>
+  </div>
+  <a class="clear-filters" href="javascript:void(0)" onclick="clearAllFilters()">Clear all</a>
+</div>
+<div class="issue-section" data-domain="cloud-readiness">
+  <h2>Cloud Readiness</h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{&quot;azure-aks&quot;:{&quot;effort&quot;:3,&quot;severity&quot;:&quot;mandatory&quot;},&quot;azure-container-apps&quot;:{&quot;effort&quot;:3,&quot;severity&quot;:&quot;mandatory&quot;}}' data-default-effort="3" data-default-severity="mandatory" data-rule="dockerfile-00000" onclick="toggleRow('row-cloudreadiness-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-0">&#x276F;</button> No Dockerfile found</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>No Dockerfile was found in the project. This suggests the application may not yet be containerized. <br/>Consider creating a Dockerfile to enable container-based replatforming to Azure services such as Azure Container Apps or AKS.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="issue-section" data-domain="java-upgrade">
+  <h2>Java Upgrade</h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{&quot;azure-aks&quot;:{&quot;effort&quot;:8,&quot;severity&quot;:&quot;mandatory&quot;},&quot;azure-appservice&quot;:{&quot;effort&quot;:8,&quot;severity&quot;:&quot;mandatory&quot;},&quot;azure-container-apps&quot;:{&quot;effort&quot;:8,&quot;severity&quot;:&quot;mandatory&quot;}}' data-default-effort="8" data-default-severity="mandatory" data-rule="azure-java-version-01000" onclick="toggleRow('row-javaupgrade-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-javaupgrade-0">&#x276F;</button> Java Version Has Reached the End of Support</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">8</td>
+    </tr>
+    <tr class="detail-row" id="row-javaupgrade-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="pom.xml">pom.xml</span></td><td><span class="position">Line 41</span></td></tr>
+            <tr><td><span class="file-path" title="pom.xml">pom.xml</span></td><td><span class="position">Line 42</span></td></tr>
+            <tr><td><span class="file-path" title="build.gradle">build.gradle</span></td><td><span class="position">Line 81</span></td></tr>
+            <tr><td><span class="file-path" title="build.gradle">build.gradle</span></td><td><span class="position">Line 82</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The application is using a Java version that has reached the end of support. It is strongly recommended to plan and execute a migration strategy to upgrade your application to a supported Java version.<br/>Supported Java versions receive long-term support (LTS) from the Java community, including bug fixes and updates. Migrating to a supported version provides you with a stable and well-maintained platform for your application.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="issue-section" data-domain="security">
+  <h2>Security <span class="badge-experimental" title="These issues were generated by AI and may contain inaccuracies or incomplete information. Please review carefully.">Experimental</span></h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="potential" onclick="toggleRow('row-security-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-security-0">&#x276F;</button> CWE-543: Use of Singleton Pattern Without Synchronization in a Multithreaded Context</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-security-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><thead><tr><th>File</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="src/main/java/com/docraptor/Configuration.java:18">src/main/java/com/docraptor/Configuration.java:18</span></td></tr>
+            <tr><td><span class="file-path" title="src/main/java/com/docraptor/Configuration.java:36">src/main/java/com/docraptor/Configuration.java:36</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The product uses the singleton pattern when creating a resource within a multithreaded environment.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" onclick="toggleRow('row-security-1', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-security-1">&#x276F;</button> CWE-567: Unsynchronized Access to Shared Data in a Multithreaded Context</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-security-1" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><thead><tr><th>File</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="src/main/java/com/docraptor/Configuration.java:18">src/main/java/com/docraptor/Configuration.java:18</span></td></tr>
+            <tr><td><span class="file-path" title="src/main/java/com/docraptor/Configuration.java:37">src/main/java/com/docraptor/Configuration.java:37</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The product does not properly synchronize shared data, such as static variables across threads, which can lead to undefined behavior and unpredictable data changes.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</div><!-- #tab-issues -->
+<div id="tab-arch" class="tab-panel">
+  <div class="fact-content"><h1 id="architecture-diagram">Architecture Diagram</h1>
+<p>This repository is a Java client SDK that wraps the DocRaptor HTTP API for document generation workflows. The architecture centers on a reusable API client, API operation facade, model contracts, and outbound HTTPS communication to the DocRaptor service.</p>
+<h2 id="application-architecture">Application Architecture</h2>
+<div class="mermaid">
+flowchart TD
+    subgraph ClientLayer["Client Layer"]
+        AppCode["Consumer Application Code"]
+    end
+
+    subgraph SdkLayer["SDK Layer - docraptor 3.2.0"]
+        Facade["DocApi facade"]
+        HttpCore["ApiClient Jersey client"]
+        Models["Model DTOs Doc AsyncDoc DocStatus PrinceOptions"]
+        Auth["HttpBasicAuth"]
+    end
+
+    subgraph Transport["Transport"]
+        Json["Jackson JSON serialization"]
+        Http["HTTPS REST calls"]
+    end
+
+    subgraph External["External Services"]
+        DocRaptor["DocRaptor API api.docraptor.com"]
+    end
+
+    AppCode -->|"invokes API methods"| Facade
+    Facade -->|"build request"| HttpCore
+    Facade -->|"request and response payloads"| Models
+    HttpCore -->|"apply credentials"| Auth
+    HttpCore -->|"serialize bodies"| Json
+    HttpCore -->|"send request"| Http
+    Http -->|"TLS"| DocRaptor
+    DocRaptor -->|"JSON or binary document response"| HttpCore
+</div>
+<h3 id="technology-stack-summary">Technology Stack Summary</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>Client Integration</td><td>Java</td><td>1.8 target</td><td>Host applications that consume the SDK</td></tr>
+<tr><td>API Facade</td><td>Generated DocApi classes</td><td>OpenAPI-generated</td><td>Provides typed operations for DocRaptor endpoints</td></tr>
+<tr><td>HTTP Transport</td><td>Jersey Client</td><td>1.19.4</td><td>Executes outbound REST calls</td></tr>
+<tr><td>Serialization</td><td>Jackson core/databind/JAX-RS</td><td>2.12.x</td><td>JSON serialization and deserialization</td></tr>
+<tr><td>Auth</td><td>HTTP Basic Auth</td><td>Built-in</td><td>Sends API key as username</td></tr>
+<tr><td>External Platform</td><td>DocRaptor API</td><td>API v2.0.0 spec</td><td>HTML to PDF/XLS/XLSX rendering service</td></tr>
+</tbody></table></div>
+<h3 id="data-storage-external-services">Data Storage & External Services</h3>
+<p>The library itself does not manage local databases or caches. It integrates with one external service, the hosted DocRaptor API over HTTPS, and exchanges JSON request/response contracts plus binary document payloads.</p>
+<h3 id="key-architectural-decisions">Key Architectural Decisions</h3>
+<ul>
+<li>Uses generated client patterns (ApiClient + operation-specific facade) to keep endpoint contracts strongly typed.</li>
+<li>Keeps runtime responsibilities focused on transport, serialization, and authentication, with no embedded persistence layer.</li>
+<li>Centralizes outbound communication through a single configurable <code>ApiClient</code> instance.</li>
+</ul>
+<h2 id="component-relationships">Component Relationships</h2>
+<div class="mermaid">
+flowchart LR
+    subgraph Presentation["Presentation"]
+        Consumer["SDK Consumer Code"]
+    end
+
+    subgraph Business["Business Logic"]
+        DocApiComp["DocApi"]
+        Config["Configuration"]
+    end
+
+    subgraph DataAccess["Data Access"]
+        ModelsComp["Doc AsyncDoc DocStatus PrinceOptions"]
+        PairComp["Pair"]
+    end
+
+    subgraph Infra["Infrastructure"]
+        ApiClientComp["ApiClient"]
+        AuthComp["HttpBasicAuth"]
+        JsonComp["ObjectMapper"]
+        HttpClientComp["Jersey Client"]
+    end
+
+    Consumer -->|"uses"| DocApiComp
+    DocApiComp -->|"gets default client"| Config
+    Config -->|"provides"| ApiClientComp
+    DocApiComp -->|"delegates invokeAPI"| ApiClientComp
+    DocApiComp -->|"maps request response"| ModelsComp
+    ApiClientComp -->|"applies credentials"| AuthComp
+    ApiClientComp -->|"serializes payloads"| JsonComp
+    ApiClientComp -->|"executes HTTP"| HttpClientComp
+    ApiClientComp -->|"uses query params"| PairComp
+</div>
+<h3 id="component-inventory">Component Inventory</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th><th>Layer</th><th>Type</th><th>Responsibility</th>
+</tr></thead><tbody>
+<tr><td>Consumer Application Code</td><td>Presentation</td><td>Client caller</td><td>Invokes SDK methods to create and retrieve documents</td></tr>
+<tr><td>DocApi</td><td>Business Logic</td><td>API facade</td><td>Exposes typed methods for each REST operation</td></tr>
+<tr><td>Configuration</td><td>Business Logic</td><td>Factory</td><td>Provides default singleton-style <code>ApiClient</code></td></tr>
+<tr><td>Doc / AsyncDoc / DocStatus / PrinceOptions</td><td>Data Access</td><td>DTO models</td><td>Carries API request and response contracts</td></tr>
+<tr><td>Pair</td><td>Data Access</td><td>Utility model</td><td>Represents query parameters</td></tr>
+<tr><td>ApiClient</td><td>Infrastructure</td><td>HTTP orchestrator</td><td>Builds requests, serializes payloads, invokes remote API</td></tr>
+<tr><td>HttpBasicAuth</td><td>Infrastructure</td><td>Auth strategy</td><td>Adds basic auth credentials to outbound requests</td></tr>
+<tr><td>ObjectMapper</td><td>Infrastructure</td><td>Serializer</td><td>Handles JSON serialization settings and modules</td></tr>
+<tr><td>Jersey Client</td><td>Infrastructure</td><td>HTTP client</td><td>Executes HTTPS requests and receives responses</td></tr>
+</tbody></table></div></div>
+</div>
+<div id="tab-api" class="tab-panel">
+  <div class="fact-content"><h1 id="api-service-communication-contracts">API & Service Communication Contracts</h1>
+<p>This SDK exposes a typed contract over seven DocRaptor REST endpoints and communicates synchronously over HTTPS. The communication model is request-response with no internal asynchronous broker patterns in the library itself.</p>
+<h2 id="service-catalog">Service Catalog</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Port</th><th>Category</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>N/A (library)</td><td>API Layer</td><td>Provides typed Java wrapper around DocRaptor HTTP API</td></tr>
+<tr><td>DocRaptor API</td><td>443</td><td>Business</td><td>Hosted external document generation service consumed by the SDK</td></tr>
+</tbody></table></div>
+<h2 id="api-endpoints-inventory">API Endpoints Inventory</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Method</th><th>Path</th><th>Request Type</th><th>Response Type</th>
+</tr></thead><tbody>
+<tr><td>DocApi</td><td>POST</td><td>/docs</td><td>Doc</td><td>byte array (document binary)</td></tr>
+<tr><td>DocApi</td><td>POST</td><td>/hosted_docs</td><td>Doc</td><td>DocStatus</td></tr>
+<tr><td>DocApi</td><td>POST</td><td>/async_docs</td><td>Doc</td><td>AsyncDoc</td></tr>
+<tr><td>DocApi</td><td>POST</td><td>/hosted_async_docs</td><td>Doc</td><td>AsyncDoc</td></tr>
+<tr><td>DocApi</td><td>GET</td><td>/status/{id}</td><td>path id string</td><td>DocStatus</td></tr>
+<tr><td>DocApi</td><td>GET</td><td>/download/{id}</td><td>path id string</td><td>byte array (document binary)</td></tr>
+<tr><td>DocApi</td><td>PATCH</td><td>/expire/{id}</td><td>path id string</td><td>empty response</td></tr>
+</tbody></table></div>
+<h2 id="management-observability-endpoints">Management & Observability Endpoints</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Endpoint</th><th>Custom Metrics (if any)</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>None declared</td><td>None</td></tr>
+<tr><td>DocRaptor API</td><td>Not defined in this repository</td><td>Not available in repository scope</td></tr>
+</tbody></table></div>
+<h2 id="dtos-contracts">DTOs & Contracts</h2>
+<p>The API contracts are represented by generated model classes: <code>Doc</code> (request payload for create operations), <code>AsyncDoc</code> (asynchronous submission acknowledgment), <code>DocStatus</code> (status polling and hosted-document metadata), and <code>PrinceOptions</code> (rendering options nested under <code>Doc</code>). These DTOs are service-level contract objects for this client library rather than gateway aggregation models. Serialization uses Jackson and Jersey integration via <code>JacksonJsonProvider</code>, and contracts are sourced from the OpenAPI specification in <code>docraptor.yaml</code>.</p>
+<h2 id="communication-patterns">Communication Patterns</h2>
+<p>All runtime calls in this repository are synchronous HTTPS requests initiated by <code>DocApi</code> through <code>ApiClient.invokeAPI(...)</code>. Asynchronous document generation is an external API behavior (submit then poll <code>/status/{id}</code> and fetch <code>/download/{id}</code>), not an internal eventing system. No retry, timeout policy tuning, circuit breaker, or service discovery framework is configured in the checked-in client code. Security posture at API contract level uses HTTP Basic authentication (API key as username) and TLS endpoints (<code>https://api.docraptor.com</code>); no additional authorization logic exists in this client.</p>
+<h2 id="service-technology-matrix">Service Technology Matrix</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Web</th><th>Data Access</th><th>Discovery</th><th>Gateway</th><th>Actuator</th><th>Cache</th><th>Metrics</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>Jersey client facade</td><td>None</td><td>None</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+<tr><td>DocRaptor API</td><td>External REST API</td><td>External</td><td>Unknown</td><td>Unknown</td><td>Unknown</td><td>Unknown</td><td>Unknown</td></tr>
+</tbody></table></div>
+<h2 id="service-communication-sequence">Service Communication Sequence</h2>
+<div class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Sdk as "DocApi"
+    participant ApiClient as "ApiClient"
+    participant Remote as "DocRaptor API"
+
+    Client->>Sdk: Create Doc request
+    Sdk->>ApiClient: Build request with Doc payload
+    ApiClient->>Remote: POST /docs or async endpoint over HTTPS
+    Remote-->>ApiClient: JSON status or binary document
+    ApiClient-->>Sdk: Deserialized DTO or byte array
+    Sdk-->>Client: API response object
+
+    alt Async generation flow
+        Client->>Sdk: Poll status id
+        Sdk->>ApiClient: GET /status/{id}
+        ApiClient->>Remote: Status request
+        Remote-->>ApiClient: DocStatus
+        ApiClient-->>Sdk: DocStatus
+        Sdk-->>Client: Status details
+    else Hosted expiration
+        Client->>Sdk: Expire hosted id
+        Sdk->>ApiClient: PATCH /expire/{id}
+        ApiClient->>Remote: Expire request
+        Remote-->>ApiClient: 200 success
+        ApiClient-->>Sdk: Completion
+        Sdk-->>Client: Success
+    end
+</div></div>
+</div>
+<div id="tab-config" class="tab-panel">
+  <div class="fact-content"><h1 id="configuration-externalized-settings-inventory">Configuration & Externalized Settings Inventory</h1>
+<p>This repository has a relatively small configuration footprint centered on build metadata, dependency versions, and runtime client settings embedded through library APIs. Configuration is primarily file-based in Maven/Gradle descriptors with no environment-specific deployment profile files in the source tree.</p>
+<h2 id="configuration-sources">Configuration Sources</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Source</th><th>Type</th><th>Path/Location</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>Maven project descriptor</td><td>Build configuration</td><td>pom.xml</td><td>Primary dependency, plugin, and profile definitions</td></tr>
+<tr><td>Gradle build descriptor</td><td>Build configuration</td><td>build.gradle</td><td>Alternate build configuration and dependency declarations</td></tr>
+<tr><td>Gradle settings</td><td>Build configuration</td><td>settings.gradle</td><td>Project naming and build wiring</td></tr>
+<tr><td>OpenAPI specification</td><td>Contract configuration</td><td>docraptor.yaml</td><td>Defines endpoint surface and model schema used for code generation</td></tr>
+<tr><td>Generator settings</td><td>Generation configuration</td><td>generator-config.json</td><td>Controls OpenAPI code generation behavior</td></tr>
+<tr><td>Runtime API configuration object</td><td>Programmatic runtime configuration</td><td>src/main/java/com/docraptor/ApiClient.java</td><td>Base path, auth setup, serializer behavior configured in code</td></tr>
+</tbody></table></div>
+<h2 id="build-profiles">Build Profiles</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th><th>Activation</th><th>Purpose</th><th>Key Dependencies/Plugins</th>
+</tr></thead><tbody>
+<tr><td>sign-artifacts (Maven)</td><td>Manual (<code>-Psign-artifacts</code>)</td><td>Signs release artifacts during verify phase</td><td>maven-gpg-plugin</td></tr>
+<tr><td>android target (Gradle)</td><td>Property-based (<code>-Ptarget=android</code>)</td><td>Builds Android library variant and publishing artifacts</td><td>com.android.library, android-maven plugin</td></tr>
+<tr><td>default java target (Gradle)</td><td>Automatic when no android target property</td><td>Builds Java library and publishes Maven artifact</td><td>java plugin, maven-publish plugin</td></tr>
+</tbody></table></div>
+<h2 id="runtime-profiles">Runtime Profiles</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th><th>Activation Method</th><th>Config Files</th><th>Key Overrides</th>
+</tr></thead><tbody>
+<tr><td>default</td><td>Library consumer runtime</td><td>None profile-specific in repo</td><td>Uses default <code>ApiClient</code> base path <code>https://api.docraptor.com</code> and basic auth strategy</td></tr>
+</tbody></table></div>
+<h2 id="properties-inventory">Properties Inventory</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Property Key</th><th>Default</th><th>Profiles</th><th>Source</th>
+</tr></thead><tbody>
+<tr><td>groupId</td><td>com.docraptor</td><td>all</td><td>pom.xml</td></tr>
+<tr><td>artifactId</td><td>docraptor</td><td>all</td><td>pom.xml</td></tr>
+<tr><td>version</td><td>3.2.0</td><td>all</td><td>pom.xml / build.gradle</td></tr>
+<tr><td>maven.compiler.source</td><td>1.8</td><td>all</td><td>pom.xml plugin configuration</td></tr>
+<tr><td>maven.compiler.target</td><td>1.8</td><td>all</td><td>pom.xml plugin configuration</td></tr>
+<tr><td>swagger-annotations-version</td><td>1.6.3</td><td>all</td><td>pom.xml properties</td></tr>
+<tr><td>jersey-version</td><td>1.19.4</td><td>all</td><td>pom.xml properties</td></tr>
+<tr><td>jackson-version</td><td>2.12.6</td><td>all</td><td>pom.xml properties</td></tr>
+<tr><td>jackson-databind-version</td><td>2.12.6.1</td><td>all</td><td>pom.xml properties</td></tr>
+<tr><td>junit-version</td><td>4.13.2</td><td>test</td><td>pom.xml properties</td></tr>
+<tr><td>ApiClient basePath</td><td>https://api.docraptor.com</td><td>runtime default</td><td>ApiClient.java</td></tr>
+</tbody></table></div>
+<h2 id="startup-parameters-resource-requirements">Startup Parameters & Resource Requirements</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>JVM/Runtime Options</th><th>Memory</th><th>Instance Count</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk tests</td><td>surefire argLine <code>-Xms512m -Xmx1500m</code></td><td>512m to 1500m heap for tests</td><td>N/A (library build/test execution only)</td></tr>
+<tr><td>docraptor-java-sdk compile</td><td>compiler memory options <code>meminitial 128m</code>, <code>maxmem 512m</code></td><td>128m to 512m compile memory</td><td>N/A</td></tr>
+</tbody></table></div>
+<h2 id="startup-dependency-chain">Startup Dependency Chain</h2>
+<ol>
+<li>Build tooling resolves dependencies from Maven Central before compile/package steps.</li>
+<li>Consumer application initializes <code>DocApi</code> and <code>ApiClient</code> at runtime.</li>
+<li>Outbound API calls require network access and valid DocRaptor credentials before successful document operations.</li>
+</ol>
+<h2 id="secrets-sensitive-configuration">Secrets & Sensitive Configuration</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Secret Reference</th><th>Type</th><th>Storage (masked)</th>
+</tr></thead><tbody>
+<tr><td>DocRaptor API key (username in HTTP Basic auth)</td><td>API credential</td><td>Provided by consuming application at runtime, not stored in repository</td></tr>
+</tbody></table></div>
+<h3 id="secrets-provisioning-workflow">Secrets Provisioning Workflow</h3>
+<p>Secrets are expected to be provided externally by the consuming application or deployment environment at runtime. The repository does not include Key Vault, Vault, or cloud secret manager integration code; credentials flow from caller configuration into <code>ApiClient.setUsername(...)</code> before outbound requests are executed.</p>
+<h2 id="feature-flags">Feature Flags</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Flag Name</th><th>Default</th><th>Controlled By</th>
+</tr></thead><tbody>
+<tr><td>ApiClient debugging mode</td><td>false</td><td>Programmatic toggle <code>ApiClient.setDebugging(...)</code></td></tr>
+<tr><td>Document test mode</td><td>true in examples</td><td>Request field in <code>Doc</code> payload</td></tr>
+</tbody></table></div>
+<h2 id="framework-runtime-versions">Framework & Runtime Versions</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th><th>Version</th><th>Source</th>
+</tr></thead><tbody>
+<tr><td>Java language target</td><td>1.8</td><td>pom.xml and build.gradle</td></tr>
+<tr><td>OpenAPI Generator output</td><td>3.2.0 client package version</td><td>Generated source headers and project metadata</td></tr>
+<tr><td>Jersey client</td><td>1.19.4</td><td>Maven/Gradle dependencies</td></tr>
+<tr><td>Jackson core stack</td><td>2.12.6 (databind 2.12.6.1)</td><td>Maven/Gradle dependencies</td></tr>
+<tr><td>Swagger annotations</td><td>1.6.3</td><td>Maven/Gradle dependencies</td></tr>
+<tr><td>JUnit</td><td>4.13.2</td><td>Maven/Gradle test dependency</td></tr>
+<tr><td>Maven compiler plugin</td><td>3.8.1</td><td>pom.xml build plugins</td></tr>
+</tbody></table></div></div>
+</div>
+<div id="tab-workflows" class="tab-panel">
+  <div class="fact-content"><h1 id="core-business-workflows">Core Business Workflows</h1>
+<p>This project supports document-generation workflows for developers integrating DocRaptor into their own systems. The core business flow is preparing a document request, submitting it to DocRaptor, and retrieving either immediate or asynchronous output.</p>
+<h2 id="domain-entities">Domain Entities</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Entity</th><th>Service / Bounded Context</th><th>Description</th><th>Key Relationships</th>
+</tr></thead><tbody>
+<tr><td>Doc</td><td>Document Submission</td><td>Represents a document generation request and rendering options</td><td>Used as input for synchronous and asynchronous creation operations</td></tr>
+<tr><td>AsyncDoc</td><td>Asynchronous Processing</td><td>Represents acknowledgment of async document job submission</td><td>Linked to later status checks and download retrieval</td></tr>
+<tr><td>DocStatus</td><td>Document Lifecycle Tracking</td><td>Represents generation state and hosted/download metadata</td><td>Consumed after async submission and hosted document creation</td></tr>
+<tr><td>PrinceOptions</td><td>Rendering Configuration</td><td>Encapsulates advanced rendering behavior for generated documents</td><td>Nested option set used by Doc request contracts</td></tr>
+</tbody></table></div>
+<h2 id="service-to-domain-mapping">Service-to-Domain Mapping</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Domain Context</th><th>Owned Entities</th><th>External Dependencies</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>Client Integration</td><td>Doc, AsyncDoc, DocStatus, PrinceOptions</td><td>DocRaptor API over HTTPS</td></tr>
+<tr><td>DocRaptor API</td><td>Document Rendering Platform</td><td>Remote document job lifecycle</td><td>External service not implemented in this repository</td></tr>
+</tbody></table></div>
+<h2 id="primary-workflows">Primary Workflows</h2>
+<h3 id="workflow-1-synchronous-document-generation">Workflow 1: Synchronous Document Generation</h3>
+<ol>
+<li>Calling application constructs a <code>Doc</code> request with content or URL, type, and options.</li>
+<li>Application invokes <code>DocApi.createDoc</code>.</li>
+<li>SDK validates required request input and submits the payload to <code>/docs</code>.</li>
+<li>DocRaptor renders the document and returns binary output in the same request cycle.</li>
+<li>Application handles the returned byte stream (save, stream, or process).</li>
+</ol>
+<h3 id="workflow-2-asynchronous-document-generation-and-retrieval">Workflow 2: Asynchronous Document Generation and Retrieval</h3>
+<ol>
+<li>Calling application submits <code>Doc</code> using <code>createAsyncDoc</code> or <code>createHostedAsyncDoc</code>.</li>
+<li>SDK receives <code>AsyncDoc</code> containing an identifier for status tracking.</li>
+<li>Application polls <code>getAsyncDocStatus</code> until processing is complete.</li>
+<li>Application retrieves final output using <code>getAsyncDoc</code> with the returned download identifier.</li>
+<li>Optionally, application calls <code>expire</code> for hosted document lifecycle cleanup.</li>
+</ol>
+<h2 id="cross-service-data-flows">Cross-Service Data Flows</h2>
+<p>All business data exchange is between the consuming application and the hosted DocRaptor API through the SDK. The client transmits document requests and receives either immediate binary output or status-driven async outputs. No cross-service aggregation is implemented in this repository, and no fallback composition path is present when the external service is unavailable.</p>
+<h2 id="business-workflow-sequence">Business Workflow Sequence</h2>
+<div class="mermaid">
+sequenceDiagram
+    participant User as "Calling Application"
+    participant SDK as "DocApi"
+    participant API as "DocRaptor API"
+
+    User->>SDK: Submit Doc request
+    SDK->>API: POST create document request
+    alt Synchronous output
+        API-->>SDK: Generated document bytes
+        SDK-->>User: Return document payload
+    else Asynchronous output
+        API-->>SDK: AsyncDoc with status id
+        SDK-->>User: Return async identifier
+        loop Until complete
+            User->>SDK: Check status by id
+            SDK->>API: GET status
+            API-->>SDK: DocStatus
+            SDK-->>User: Current status
+        end
+        User->>SDK: Download completed document
+        SDK->>API: GET download by id
+        API-->>SDK: Generated document bytes
+        SDK-->>User: Return document payload
+    end
+</div>
+<h2 id="business-rules-decision-logic">Business Rules & Decision Logic</h2>
+<ul>
+<li>A document request must include required business inputs (such as document name, type, and content/url path per API contract) before submission.</li>
+<li>The caller chooses synchronous vs asynchronous processing based on expected rendering duration and integration flow requirements.</li>
+<li>Asynchronous lifecycle requires status polling before download retrieval.</li>
+<li>Hosted document management includes optional explicit expiration to end hosted availability.</li>
+<li>Authentication credentials must be configured in the client before any workflow step can complete successfully.</li>
+</ul></div>
+</div>
+<div id="tab-deps" class="tab-panel">
+  <div class="fact-content"><h1 id="dependency-map">Dependency Map</h1>
+<p>This Java SDK project declares a compact set of runtime dependencies for HTTP transport, JSON handling, date support, and annotations, plus one test framework dependency. The runtime dependency surface is approximately 11 libraries (excluding plugins and test scope).</p>
+<h2 id="dependencies">Dependencies</h2>
+<div class="mermaid">
+flowchart LR
+    App["docraptor Java SDK"]
+
+    subgraph Web["Web Frameworks"]
+        JerseyClient["jersey-client 1.19.4"]
+        JerseyMultipart["jersey-multipart 1.19.4"]
+    end
+
+    subgraph Data["Database and ORM"]
+        NoDb["No database dependencies declared"]
+    end
+
+    subgraph Security["Security"]
+        AnnotationApi["jakarta.annotation-api 1.3.5"]
+    end
+
+    subgraph Logging["Logging"]
+        NoLogging["No logging framework dependency declared"]
+    end
+
+    subgraph Utility["Utilities"]
+        SwaggerAnn["swagger-annotations 1.6.3"]
+        Jsr305["jsr305 3.0.2"]
+        JacksonCore["jackson-core 2.12.6"]
+        JacksonAnn["jackson-annotations 2.12.6"]
+        JacksonDatabind["jackson-databind 2.12.6.1"]
+        JacksonJaxrs["jackson-jaxrs-json-provider 2.12.6"]
+        JacksonNullable["jackson-databind-nullable 0.2.3"]
+        JacksonJoda["jackson-datatype-joda 2.12.6"]
+        JacksonJsr310["jackson-datatype-jsr310 2.12.6"]
+        JodaTime["joda-time 2.9.9"]
+    end
+
+    App -->|"http"| Web
+    App -->|"persistence"| Data
+    App -->|"security annotations"| Security
+    App -->|"logging"| Logging
+    App -->|"serialization and utilities"| Utility
+    JerseyMultipart -.->|"built on"| JerseyClient
+    JacksonJaxrs -.->|"integrates with"| JacksonDatabind
+</div>
+<h3 id="dependency-summary">Dependency Summary</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Category</th><th>Count</th><th>Key Libraries</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>Web Frameworks</td><td>2</td><td>jersey-client, jersey-multipart</td><td>Legacy Jersey 1.x client stack for REST calls</td></tr>
+<tr><td>Database / ORM</td><td>0</td><td>None</td><td>SDK does not persist local data</td></tr>
+<tr><td>Messaging</td><td>0</td><td>None</td><td>No messaging client dependencies</td></tr>
+<tr><td>Caching</td><td>0</td><td>None</td><td>No caching library declared</td></tr>
+<tr><td>Logging</td><td>0</td><td>None</td><td>Uses optional Jersey logging filter instead of a logging framework dependency</td></tr>
+<tr><td>Security</td><td>1</td><td>jakarta.annotation-api</td><td>Provides annotation compatibility support</td></tr>
+<tr><td>Observability</td><td>0</td><td>None</td><td>No metrics/tracing dependencies</td></tr>
+<tr><td>Utilities</td><td>10</td><td>Jackson modules, Swagger annotations, Joda-Time</td><td>Serialization, typing, and compatibility support</td></tr>
+</tbody></table></div>
+<h3 id="version-compatibility-risks">Version & Compatibility Risks</h3>
+<p>The project targets Java 8 and uses legacy Jersey 1.19.4 plus Joda-Time 2.9.9, both of which are older-generation dependencies that may require modernization for newer Jakarta or Java runtime ecosystems. Jackson 2.12.x is stable but not current, so compatibility and vulnerability posture should be tracked as upstream updates are released.</p>
+<h3 id="notable-observations">Notable Observations</h3>
+<ul>
+<li>Dependency set is intentionally lean and focused on API transport plus serialization.</li>
+<li>Multiple Jackson modules are used to support date/time variants and nullable schema behavior.</li>
+<li>No ORM, database, cache, or messaging dependencies are present, consistent with an API client library role.</li>
+<li>Test dependencies are minimal, indicating lightweight validation coverage from dependency perspective.</li>
+</ul>
+<h2 id="test-dependencies">Test Dependencies</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Framework</th><th>Version</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>JUnit</td><td>4.13.2</td><td>Primary test framework declared in Maven and Gradle test scopes</td></tr>
+</tbody></table></div>
+<p>Total test-scope dependencies: 1</p>
+<p>The project has a minimal test dependency footprint centered on JUnit 4, with no dedicated mocking or integration test dependency declared in the main build files.</p></div>
+</div>
+<div id="tab-data" class="tab-panel">
+  <div class="fact-content"><h1 id="data-architecture-persistence-layer">Data Architecture & Persistence Layer</h1>
+<p>This repository operates as an API client SDK and does not own an application database. The data layer consists of in-memory request and response models serialized to and from DocRaptor API contracts.</p>
+<h2 id="database-configuration">Database Configuration</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service/Module</th><th>DB Type</th><th>Profile</th><th>Driver</th><th>Connection</th><th>Migration Tool</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>None</td><td>default</td><td>None</td><td>No local database connection configured</td><td>None</td></tr>
+</tbody></table></div>
+<h2 id="data-ownership-per-service">Data Ownership per Service</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Tables Owned</th><th>ORM Framework</th><th>Caching</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>None</td><td>None</td><td>None</td><td>SDK owns contract classes only; persistence is external to this repository</td></tr>
+</tbody></table></div>
+<h2 id="entity-model">Entity Model</h2>
+<div class="mermaid">
+erDiagram
+    DOC ||--o{ PRINCE_OPTIONS : "uses"
+    DOC_STATUS ||--o{ DOC : "describes generation output for"
+    ASYNC_DOC ||--|| DOC_STATUS : "references status lifecycle"
+
+    DOC {
+        string name PK "document identifier"
+        string documentType "pdf xls xlsx"
+        string documentContent "inline html payload"
+        string documentUrl "source url option"
+    }
+    PRINCE_OPTIONS {
+        string media PK "rendering media"
+        string baseurl "base url"
+    }
+    DOC_STATUS {
+        string statusId PK "async status identifier"
+        string downloadId "download token"
+        string status "processing state"
+    }
+    ASYNC_DOC {
+        string statusId PK "async response identifier"
+        string status "queued or processing"
+    }
+</div>
+<h2 id="key-repository-methods">Key Repository Methods</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Repository</th><th>Notable Methods</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>docraptor-java-sdk</td><td>None</td><td>None</td><td>Project does not implement repository interfaces or local persistence access methods</td></tr>
+</tbody></table></div>
+<h2 id="caching-strategy">Caching Strategy</h2>
+<p>No application-side caching provider or cache abstraction is configured in this repository. Each API call is executed directly through <code>ApiClient</code> and responses are returned to the caller without local cache storage.</p>
+<h2 id="data-ownership-boundaries">Data Ownership Boundaries</h2>
+<p>Data storage is fully externalized to the DocRaptor platform. The SDK does not expose direct database access paths and does not share storage with other local services. All data movement occurs as request and response payloads across HTTPS, with the client acting as a transport and contract boundary.</p>
+<h3 id="data-classification-sensitivity">Data Classification & Sensitivity</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Entity</th><th>Sensitive Fields</th><th>Classification (PII/PHI/PCI/None)</th><th>Controls in Place</th>
+</tr></thead><tbody>
+<tr><td>Doc</td><td>Potential HTML input that may include user business content</td><td>PII possible in payload content</td><td>Transport security via HTTPS to remote API; no local at-rest persistence in this repo</td></tr>
+<tr><td>AsyncDoc</td><td>status identifiers</td><td>None</td><td>No local persistence</td></tr>
+<tr><td>DocStatus</td><td>download identifiers and status metadata</td><td>None</td><td>No local persistence</td></tr>
+<tr><td>PrinceOptions</td><td>rendering options</td><td>None</td><td>No local persistence</td></tr>
+</tbody></table></div></div>
+</div>
+<p class="footer">Your feedback is invaluable &mdash; <a href="https://aka.ms/ghcp-appmod/feedback">Share feedback</a></p>
+<script>
+function toggleRow(rowId, triggerRow) {
+  var detail = document.getElementById(rowId);
+  var btn = document.getElementById('btn-' + rowId);
+  if (!detail) return;
+  var visible = detail.style.display !== 'none';
+  detail.style.display = visible ? 'none' : 'table-row';
+  if (btn) btn.classList.toggle('open', !visible);
+}
+(function() {
+  var nav = document.querySelector('.tab-nav');
+  if (!nav) return;
+  nav.addEventListener('click', function(e) {
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    var targetId = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    var panel = document.getElementById(targetId);
+    if (panel) {
+      panel.classList.add('active');
+      if (window.__mermaidReady) { window.__renderMermaidIn(panel); }
+    }
+  });
+})();
+
+// ── Diagram lightbox ────────────────────────────────────────
+(function() {
+  var lightbox = document.getElementById('diagram-lightbox');
+  var inner = document.getElementById('diagram-lightbox-inner');
+  var closeBtn = document.getElementById('diagram-lightbox-close');
+  if (!lightbox || !inner || !closeBtn) return;
+
+  var scale = 1;
+  var translateX = 0;
+  var translateY = 0;
+  var isDragging = false;
+  var dragStartX = 0;
+  var dragStartY = 0;
+
+  function applyTransform() {
+    var svg = inner.querySelector('svg');
+    if (svg) {
+      svg.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')';
+      svg.style.transformOrigin = 'center center';
+      svg.style.transition = 'none';
+    }
+  }
+
+  function resetTransform() {
+    scale = 1; translateX = 0; translateY = 0;
+    applyTransform();
+  }
+
+  function openLightbox(svgEl) {
+    inner.innerHTML = svgEl.outerHTML;
+    var injected = inner.querySelector('svg');
+    if (injected) {
+      injected.removeAttribute('width');
+      injected.removeAttribute('height');
+      injected.style.cursor = 'grab';
+    }
+    resetTransform();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    inner.innerHTML = '';
+    document.body.style.overflow = '';
+    resetTransform();
+  }
+
+  inner.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? 0.9 : 1.1;
+    scale = Math.min(Math.max(scale * delta, 0.3), 8);
+    applyTransform();
+  }, { passive: false });
+
+  inner.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    isDragging = true;
+    dragStartX = e.clientX - translateX;
+    dragStartY = e.clientY - translateY;
+    var svg = inner.querySelector('svg');
+    if (svg) { svg.style.cursor = 'grabbing'; }
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    translateX = e.clientX - dragStartX;
+    translateY = e.clientY - dragStartY;
+    applyTransform();
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    var svg = inner.querySelector('svg');
+    if (svg) { svg.style.cursor = 'grab'; }
+  });
+
+  inner.addEventListener('dblclick', function() { resetTransform(); });
+
+  document.addEventListener('click', function(e) {
+    var card = e.target.closest('.mermaid');
+    if (!card) return;
+    if (e.target.closest('.diagram-lightbox-close')) return;
+    var svg = card.querySelector('svg');
+    if (svg) { openLightbox(svg); }
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+
+  lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox) { closeLightbox(); }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeLightbox(); }
+  });
+})();
+
+var _currentTarget = '';
+
+function toggleMultiSelect(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  document.querySelectorAll('.multi-select.open').forEach(function(ms) { if (ms.id !== id) ms.classList.remove('open'); });
+  el.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(function(ms) { ms.classList.remove('open'); });
+  }
+});
+
+function getMultiSelectValues(msId) {
+  var el = document.getElementById(msId);
+  if (!el) return [];
+  var checked = el.querySelectorAll('input[type=checkbox]:checked');
+  var vals = [];
+  for (var i = 0; i < checked.length; i++) vals.push(checked[i].value);
+  return vals;
+}
+
+function onMultiSelectChange(msId, label) {
+  var el = document.getElementById(msId);
+  if (!el) return;
+  var vals = getMultiSelectValues(msId);
+  var total = el.querySelectorAll('input[type=checkbox]').length;
+  var btn = el.querySelector('.multi-select-btn');
+  if (btn) {
+    btn.textContent = vals.length > 0 && vals.length < total ? label + ' (' + vals.length + ')' : label;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  var selectedDomains = getMultiSelectValues('domain-ms');
+  var selectedCrits = getMultiSelectValues('criticality-ms');
+
+  var sections = document.querySelectorAll('.issue-section');
+  for (var i = 0; i < sections.length; i++) {
+    var domain = sections[i].getAttribute('data-domain');
+    sections[i].style.display = (selectedDomains.length === 0 || selectedDomains.indexOf(domain) >= 0) ? '' : 'none';
+  }
+
+  var rows = document.querySelectorAll('.issue-row');
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var section = row.closest('.issue-section');
+    if (section && section.style.display === 'none') {
+      row.style.display = 'none';
+      var next = row.nextElementSibling;
+      if (next && next.classList.contains('detail-row')) next.style.display = 'none';
+      continue;
+    }
+
+    var show = true;
+    if (_currentTarget && row.hasAttribute('data-targets')) {
+      var targetsStr = row.getAttribute('data-targets');
+      if (targetsStr && targetsStr !== '{}') {
+        try {
+          var targets = JSON.parse(targetsStr);
+          if (Object.keys(targets).length > 0 && !targets[_currentTarget]) {
+            show = false;
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (show && selectedCrits.length > 0) {
+      var crit = row.getAttribute('data-criticality');
+      if (selectedCrits.indexOf(crit) < 0) show = false;
+    }
+
+    row.style.display = show ? '' : 'none';
+    var nextRow = row.nextElementSibling;
+    if (nextRow && nextRow.classList.contains('detail-row')) {
+      if (!show) nextRow.style.display = 'none';
+    }
+  }
+}
+
+function clearAllFilters() {
+  document.querySelectorAll('.multi-select input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+  var domainBtn = document.querySelector('#domain-ms .multi-select-btn');
+  if (domainBtn) domainBtn.textContent = 'Domain';
+  var critBtn = document.querySelector('#criticality-ms .multi-select-btn');
+  if (critBtn) critBtn.textContent = 'Criticality';
+  applyFilters();
+}
+
+function onTargetChange(targetId) {
+  _currentTarget = targetId;
+  var rows = document.querySelectorAll('.issue-row[data-targets]');
+  var totalEffort = 0;
+  var domainCrits = {};
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var targets = JSON.parse(row.getAttribute('data-targets'));
+    var section = row.closest('.issue-section');
+    var domain = section ? section.getAttribute('data-domain') : '';
+
+    if (!targets || Object.keys(targets).length === 0) {
+      var sp = parseFloat(row.querySelector('.sp-cell').textContent) || 0;
+      totalEffort += sp;
+      if (!domainCrits[domain]) domainCrits[domain] = {mandatory:0,potential:0,optional:0};
+      var crit = row.getAttribute('data-criticality') || 'optional';
+      domainCrits[domain][crit] = (domainCrits[domain][crit] || 0) + 1;
+      continue;
+    }
+
+    var override = targets[targetId];
+    if (!override) {
+      continue;
+    }
+
+    var newSeverity = (override.severity || row.getAttribute('data-default-severity') || '').toLowerCase();
+    row.setAttribute('data-criticality', newSeverity);
+    var critCell = row.querySelector('.crit-cell');
+    if (critCell) {
+      var critText = newSeverity === 'mandatory' ? 'Mandatory' : newSeverity === 'potential' ? 'Potential' : 'Optional';
+      var cssClass = newSeverity === 'mandatory' ? 'crit-square-mandatory' : newSeverity === 'potential' ? 'crit-square-potential' : 'crit-square-optional';
+      critCell.innerHTML = '<span class="crit-label"><span class="crit-square ' + cssClass + '"></span>' + critText + '</span>';
+    }
+
+    var newEffort = override.effort !== undefined ? override.effort : parseFloat(row.getAttribute('data-default-effort')) || 0;
+    var spCell = row.querySelector('.sp-cell');
+    if (spCell) spCell.textContent = newEffort;
+    totalEffort += newEffort;
+
+    if (!domainCrits[domain]) domainCrits[domain] = {mandatory:0,potential:0,optional:0};
+    domainCrits[domain][newSeverity] = (domainCrits[domain][newSeverity] || 0) + 1;
+  }
+
+  var secSection = document.querySelector('.issue-section[data-domain="security"]');
+  if (secSection) {
+    var secRows = secSection.querySelectorAll('.issue-row');
+    for (var j = 0; j < secRows.length; j++) {
+      if (!secRows[j].hasAttribute('data-targets') || secRows[j].getAttribute('data-targets') === '') {
+        var sp = parseFloat(secRows[j].querySelector('.sp-cell').textContent) || 0;
+        totalEffort += sp;
+        if (!domainCrits['security']) domainCrits['security'] = {mandatory:0,potential:0,optional:0};
+        var sc = secRows[j].getAttribute('data-criticality') || 'optional';
+        domainCrits['security'][sc] = (domainCrits['security'][sc] || 0) + 1;
+      }
+    }
+  }
+
+  var label = totalEffort < 20 ? 'S' : totalEffort < 50 ? 'M' : totalEffort < 100 ? 'L' : 'XL';
+  var effortEl = document.getElementById('effort-display');
+  if (effortEl) effortEl.textContent = label + ' (total story points: ' + totalEffort + ')';
+
+  updateDonuts(domainCrits);
+  applyFilters();
+}
+
+function updateDonuts(domainCrits) {
+  var container = document.getElementById('donut-container');
+  if (!container) return;
+  container.innerHTML = '';
+  var domainNames = {'cloud-readiness':'Cloud Readiness','java-upgrade':'Java Upgrade','dotnet-upgrade':'DotNET Upgrade','security':'Security'};
+  var domainOrder = ['cloud-readiness','java-upgrade','dotnet-upgrade','security'];
+  for (var d = 0; d < domainOrder.length; d++) {
+    var key = domainOrder[d];
+    var c = domainCrits[key];
+    if (!c || (c.mandatory + c.potential + c.optional) === 0) continue;
+    var total = c.mandatory + c.potential + c.optional;
+    var div = document.createElement('div');
+    div.className = 'domain-summary-item';
+    div.innerHTML = buildDonutSvg(c.mandatory, c.potential, c.optional) +
+      '<h3>' + domainNames[key] + '</h3>' +
+      '<div class="count">' + total + ' issue' + (total !== 1 ? 's' : '') + '</div>';
+    container.appendChild(div);
+  }
+}
+
+function buildDonutSvg(m, p, o) {
+  var total = m + p + o;
+  if (total === 0) return '<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;"><circle cx="50" cy="50" r="35" fill="none" stroke="#d0d7de" stroke-width="15" opacity="0.5"/></svg>';
+  var r = 35, circ = 2 * Math.PI * r, offset = 0;
+  var svg = '<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">';
+  var segs = [{c:m,color:'var(--color-mandatory)'},{c:p,color:'var(--color-potential)'},{c:o,color:'var(--color-optional)'}];
+  for (var i = 0; i < segs.length; i++) {
+    if (segs[i].c === 0) continue;
+    var segLen = (segs[i].c / total) * circ;
+    var gap = total > segs[i].c ? 1.5 : 0;
+    var drawLen = Math.max(segLen - gap, 0.5);
+    svg += '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="' + segs[i].color + '" stroke-width="15" stroke-dasharray="' + drawLen.toFixed(2) + ' ' + circ.toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '"/>';
+    offset += segLen;
+  }
+  svg += '</svg>';
+  return svg;
+}
+</script>
+<script>document.addEventListener('DOMContentLoaded', function() { onTargetChange('azure-appservice'); });</script>
+</div></body></html>
