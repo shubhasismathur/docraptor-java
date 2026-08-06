@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/azure/modernize/main/schemas/tasks-schema.json",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-plaintext-credential-to-azure-keyvault",
+      "description": "Migrate the DocRaptor API key from hardcoded plaintext in source code to Azure Key Vault for secure, centralized secret management.",
+      "reason": "The DocRaptor API key is currently stored as a hardcoded string literal in Java source files. Externalizing it to Azure Key Vault eliminates credential leakage risk and enables centralized secret rotation.",
+      "requirements": "Identify all locations in the codebase where the DocRaptor API key (or any other plaintext credentials/tokens) are referenced as string literals. Migrate these credentials to Azure Key Vault. Update the application to retrieve secrets from Key Vault at runtime using Managed Identity authentication. Ensure the project builds and all unit tests pass after the change.",
+      "skills": [
+        {
+          "name": "migration-plaintext-credential-to-azure-keyvault",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "002-security-cve-remediation",
+      "description": "Scan all project dependencies for known CVEs and remediate any identified vulnerabilities to ensure the application is secure before deployment.",
+      "reason": "The project uses several older dependency versions (Jersey 1.19.4, Jackson 2.12.6, Swagger Annotations 1.6.3) that may carry known CVEs. Remediating these ensures the library is safe for production use.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, the current version, the upgraded major version, and the breaking change risk. Verify that the project builds and all unit tests pass after remediation.",
+      "environmentConfiguration": "Java 8 runtime, Maven build tool.",
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      },
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ]
+    },
+    {
+      "type": "deployment",
+      "id": "003-deployment-azure-container-apps",
+      "description": "Containerize the docraptor-java application and deploy it to Azure Container Apps.",
+      "reason": "Deploying to Azure Container Apps provides a managed, scalable, cloud-native hosting environment with built-in support for Managed Identity, enabling secure access to Azure Key Vault secrets.",
+      "requirements": "Create a Dockerfile for the Java application. Build the container image and deploy it to Azure Container Apps. Configure the app to use Managed Identity for authentication to Azure Key Vault. Ensure the deployment succeeds and the application is accessible.",
+      "targetAzureService": "azurecontainerapp",
+      "resourceStatus": "new",
+      "deploymentTool": "bicep",
+      "dependencies": [
+        "001-transform-plaintext-credential-to-azure-keyvault",
+        "002-security-cve-remediation"
+      ],
+      "skills": [
+        {
+          "name": "azcli-containerapp-deploy",
+          "location": "builtin"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "planName": "modrnization_plan",
+    "projectName": "docraptor-java",
+    "language": "java",
+    "createdAt": "2026-08-06T12:51:31Z",
+    "version": "1.0"
+  }
+}
