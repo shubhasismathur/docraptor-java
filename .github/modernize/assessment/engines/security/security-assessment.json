@@ -1,0 +1,170 @@
+{
+  "GeneratedAt": "2026-08-06T12:01:28.0000000Z",
+  "ProjectPath": ".",
+  "Summary": {
+    "TotalFindings": 12,
+    "CveCount": 6,
+    "CweCount": 6,
+    "BySeverity": {
+      "mandatory": 6,
+      "optional": 1,
+      "potential": 5
+    },
+    "ByCategory": {
+      "CVE": 6,
+      "Code Quality": 2,
+      "Concurrency & Synchronization": 3,
+      "Credentials & Secrets": 1
+    },
+    "TotalRulesAssessed": 59,
+    "RulesPassed": 53
+  },
+  "CveFindings": [
+    {
+      "Id": "GHSA-r7wm-3cxj-wff9",
+      "Name": "jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[GHSA-r7wm-3cxj-wff9](https://github.com/advisories/GHSA-r7wm-3cxj-wff9): jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-core` < 2.18.8 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-core` >= 2.19.0, < 2.21.4 \u2192 fix: **2.21.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:172"
+      ],
+      "Explanation": "[GHSA-r7wm-3cxj-wff9](https://github.com/advisories/GHSA-r7wm-3cxj-wff9): jackson-core: Async parser maxNumberLength bypass via chunked digit accumulation (incomplete fix for GHSA-72hv-8253-57qq)\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-core` < 2.18.8 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-core` >= 2.19.0, < 2.21.4 \u2192 fix: **2.21.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    },
+    {
+      "Id": "CVE-2026-54513",
+      "Name": "jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[CVE-2026-54513](https://github.com/advisories/GHSA-rmj7-2vxq-3g9f): jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.10.0, < 2.18.8 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.19.0, < 2.21.4 \u2192 fix: **2.21.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 3.0.0, < 3.1.4 \u2192 fix: **3.1.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:183"
+      ],
+      "Explanation": "[CVE-2026-54513](https://github.com/advisories/GHSA-rmj7-2vxq-3g9f): jackson-databind has an array subtype allowlist bypass in BasicPolymorphicTypeValidator (allowIfSubTypeIsArray)\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.10.0, < 2.18.8 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.19.0, < 2.21.4 \u2192 fix: **2.21.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 3.0.0, < 3.1.4 \u2192 fix: **3.1.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    },
+    {
+      "Id": "CVE-2026-54512",
+      "Name": "jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[CVE-2026-54512](https://github.com/advisories/GHSA-j3rv-43j4-c7qm): jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.10.0, <= 2.18.7 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.19.0, <= 2.21.3 \u2192 fix: **2.21.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 3.0.0, <= 3.1.3 \u2192 fix: **3.1.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:183"
+      ],
+      "Explanation": "[CVE-2026-54512](https://github.com/advisories/GHSA-j3rv-43j4-c7qm): jackson-databind has a PolymorphicTypeValidator bypass via generic type parameters that allows arbitrary class instantiation\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.10.0, <= 2.18.7 \u2192 fix: **2.18.8**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.19.0, <= 2.21.3 \u2192 fix: **2.21.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 3.0.0, <= 3.1.3 \u2192 fix: **3.1.4**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    },
+    {
+      "Id": "CVE-2025-52999",
+      "Name": "jackson-core can throw a StackoverflowError when processing deeply nested data",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[CVE-2025-52999](https://github.com/advisories/GHSA-h46c-h94j-95f3): jackson-core can throw a StackoverflowError when processing deeply nested data\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-core` < 2.15.0 \u2192 fix: **2.15.0**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:172"
+      ],
+      "Explanation": "[CVE-2025-52999](https://github.com/advisories/GHSA-h46c-h94j-95f3): jackson-core can throw a StackoverflowError when processing deeply nested data\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-core` < 2.15.0 \u2192 fix: **2.15.0**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    },
+    {
+      "Id": "CVE-2022-42003",
+      "Name": "Uncontrolled Resource Consumption in Jackson-databind",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[CVE-2022-42003](https://github.com/advisories/GHSA-jjjh-jjxp-wpff): Uncontrolled Resource Consumption in Jackson-databind\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.13.0, < 2.13.4.2 \u2192 fix: **2.13.4.2**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.4.0-rc1, < 2.12.7.1 \u2192 fix: **2.12.7.1**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:183"
+      ],
+      "Explanation": "[CVE-2022-42003](https://github.com/advisories/GHSA-jjjh-jjxp-wpff): Uncontrolled Resource Consumption in Jackson-databind\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.13.0, < 2.13.4.2 \u2192 fix: **2.13.4.2**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.4.0-rc1, < 2.12.7.1 \u2192 fix: **2.12.7.1**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    },
+    {
+      "Id": "CVE-2022-42004",
+      "Name": "Uncontrolled Resource Consumption in FasterXML jackson-databind",
+      "Category": "CVE",
+      "Severity": "mandatory",
+      "StoryPoint": 1,
+      "Description": "[CVE-2022-42004](https://github.com/advisories/GHSA-rgv9-q543-rqg4): Uncontrolled Resource Consumption in FasterXML jackson-databind\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.13.0, < 2.13.4 \u2192 fix: **2.13.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.4.0-rc1, < 2.12.7.1 \u2192 fix: **2.12.7.1**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later.",
+      "Files": [
+        "pom.xml:183"
+      ],
+      "Explanation": "[CVE-2022-42004](https://github.com/advisories/GHSA-rgv9-q543-rqg4): Uncontrolled Resource Consumption in FasterXML jackson-databind\n\n**Severity**: HIGH\n\n**Affected dependencies**:\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.13.0, < 2.13.4 \u2192 fix: **2.13.4**\n  - `com.fasterxml.jackson.core:jackson-databind` >= 2.4.0-rc1, < 2.12.7.1 \u2192 fix: **2.12.7.1**\n\n**Recommended fix**: Upgrade all `com.fasterxml.jackson.core` artifacts to 2.18.9 or later."
+    }
+  ],
+  "CweFindings": [
+    {
+      "Id": "CWE-477",
+      "Name": "Use of Obsolete Function",
+      "Category": "Code Quality",
+      "Severity": "optional",
+      "StoryPoint": 1,
+      "Description": "The code uses deprecated or obsolete functions, which suggests that the code has not been actively reviewed or maintained.",
+      "Files": [
+        "src/main/java/com/docraptor/PrinceOptions.java"
+      ],
+      "Explanation": "PrinceOptions.getVersion() / setVersion() (around line 893-905) is explicitly marked as deprecated in its Javadoc: 'Deprecated, use the appropriate pipeline version. Specify a specific version of PrinceXML to use.' The method and its backing field remain in the public API without removal, constituting use of an obsolete API element."
+    },
+    {
+      "Id": "CWE-772",
+      "Name": "Missing Release of Resource after Effective Lifetime",
+      "Category": "Code Quality",
+      "Severity": "potential",
+      "StoryPoint": 3,
+      "Description": "The product does not release a resource after its effective lifetime has ended, i.e., after the resource is no longer needed.",
+      "Files": [
+        "src/main/java/com/docraptor/ApiClient.java"
+      ],
+      "Explanation": "In ApiClient.invokeAPI() (around line 720-748), a ClientResponse object is obtained from getAPIResponse() but is never explicitly closed in a finally block. Jersey 1.x ClientResponse holds an underlying HTTP connection; if not closed, HTTP connections may not be returned to the connection pool, leading to connection leaks under error paths where getEntity() is not called."
+    },
+    {
+      "Id": "CWE-543",
+      "Name": "Use of Singleton Pattern Without Synchronization in a Multithreaded Context",
+      "Category": "Concurrency & Synchronization",
+      "Severity": "potential",
+      "StoryPoint": 5,
+      "Description": "The product uses the singleton pattern when creating a resource within a multithreaded environment.",
+      "Files": [
+        "src/main/java/com/docraptor/Configuration.java"
+      ],
+      "Explanation": "Configuration.defaultApiClient is a static field initialized at class load time and exposed via getDefaultApiClient() / setDefaultApiClient(ApiClient). Neither method is synchronized, and the field is not declared volatile. In a multithreaded environment, two threads calling setDefaultApiClient() and getDefaultApiClient() concurrently may observe a stale or partially constructed ApiClient reference due to absence of a memory barrier."
+    },
+    {
+      "Id": "CWE-567",
+      "Name": "Unsynchronized Access to Shared Data in a Multithreaded Context",
+      "Category": "Concurrency & Synchronization",
+      "Severity": "potential",
+      "StoryPoint": 5,
+      "Description": "The product does not properly synchronize shared data, such as static variables across threads, which can lead to undefined behavior and unpredictable data changes.",
+      "Files": [
+        "src/main/java/com/docraptor/Configuration.java"
+      ],
+      "Explanation": "The static field Configuration.defaultApiClient is accessed and mutated by getDefaultApiClient() and setDefaultApiClient() without any synchronization (no synchronized keyword, no volatile modifier, no AtomicReference). Concurrent reads and writes to this shared reference are a data race under the Java Memory Model."
+    },
+    {
+      "Id": "CWE-820",
+      "Name": "Missing Synchronization",
+      "Category": "Concurrency & Synchronization",
+      "Severity": "potential",
+      "StoryPoint": 8,
+      "Description": "The product utilizes a shared resource in a concurrent manner but does not attempt to synchronize access to the resource.",
+      "Files": [
+        "src/main/java/com/docraptor/Configuration.java"
+      ],
+      "Explanation": "Configuration.defaultApiClient is a mutable static shared resource with no synchronization at all \u2014 no synchronized block, no volatile, no lock, no atomic wrapper. Multiple threads sharing a single ApiClient via Configuration.getDefaultApiClient() with concurrent calls to setDefaultApiClient() have no synchronization mechanism whatsoever."
+    },
+    {
+      "Id": "CWE-778",
+      "Name": "Insufficient Logging",
+      "Category": "Credentials & Secrets",
+      "Severity": "potential",
+      "StoryPoint": 3,
+      "Description": "When a security-critical event occurs, the product either does not record the event or omits important details about the event when logging it.",
+      "Files": [
+        "src/main/java/com/docraptor/ApiClient.java"
+      ],
+      "Explanation": "ApiClient contains no security event logging. Authentication failures (HTTP 401/403 from the DocRaptor API), connection errors, and API exceptions are caught and wrapped into ApiException but never logged. The optional Jersey LoggingFilter (line 27-130) logs full request/response bodies but is disabled by default and, when enabled, would log the API key in plaintext. There is no structured security audit trail for authentication attempts, failures, or sensitive API calls."
+    }
+  ]
+}
