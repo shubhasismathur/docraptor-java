@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "metadata": {
+    "planName": "modernization-plan",
+    "projectName": "docraptor-java",
+    "language": "java",
+    "createdAt": "2026-08-06T12:24:30Z",
+    "version": "1.0"
+  },
+  "tasks": [
+    {
+      "type": "upgrade",
+      "id": "001-upgrade-java21",
+      "description": "Upgrade the project runtime from Java 8 to Java 21 LTS, updating Maven compiler settings, build configuration, and all incompatible dependencies.",
+      "reason": "Java 8 is out of long-term support. Java 21 is the current LTS version offering improved performance, security, and language features. Upgrading enables compatibility with modern Azure SDKs and libraries.",
+      "requirements": "Upgrade source/target Java version from 1.8 to 21 in pom.xml. Update jersey-client from 1.x to a Java 21-compatible HTTP client (e.g., Jersey 3.x or migrate to Java built-in HttpClient). Update Jackson to the latest 2.x compatible version. Update JUnit from 4.x to JUnit 5.x. Ensure the project compiles cleanly and all existing unit tests pass after the upgrade.",
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-log-to-console",
+      "description": "Migrate application logging to console-only output suitable for containerized cloud deployments.",
+      "reason": "Cloud-native and containerized applications should emit logs to stdout/stderr for aggregation by the container runtime, rather than writing to log files.",
+      "requirements": "Remove any file-based log appenders from logging configuration. Ensure all log output is directed to console (stdout/stderr). This prepares the application for containerized deployment on Azure.",
+      "dependencies": ["001-upgrade-java21"],
+      "skills": [
+        {
+          "name": "migration-log-to-console",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "003-security-cve-remediation",
+      "description": "Scan all project dependencies for known CVEs and remediate identified vulnerabilities to ensure the application is secure before deployment.",
+      "reason": "The project uses aging dependencies (Jersey 1.x, Jackson 2.12.x) which may have known security vulnerabilities. Remediating CVEs is required before deploying to a cloud environment.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, current version, upgraded major version, and breaking change risk. Verify that the project builds and all tests pass after remediation.",
+      "dependencies": ["002-transform-log-to-console"],
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "deployment",
+      "id": "004-deployment-azure-container-apps",
+      "description": "Containerize the docraptor-java application and deploy it to Azure Container Apps.",
+      "reason": "Azure Container Apps provides a managed, scalable, serverless container hosting environment. Deploying here enables the application to benefit from automatic scaling, managed infrastructure, and cloud-native operations.",
+      "requirements": "Generate a Dockerfile for the Java 21 Maven application. Build the container image and deploy to Azure Container Apps. Create new Azure Container Apps resources as needed. Use Managed Identity for authentication where applicable.",
+      "dependencies": ["003-security-cve-remediation"],
+      "targetAzureService": "azurecontainerapp",
+      "resourceStatus": "create new",
+      "deploymentTool": "bicep",
+      "skills": [
+        {
+          "name": "azcli-containerapp-deploy",
+          "location": "builtin"
+        }
+      ]
+    }
+  ]
+}
