@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "security",
+      "id": "001-security-cve-remediation",
+      "description": "Scan all project dependencies for known CVEs and remediate any identified vulnerabilities to ensure the application is secure.",
+      "reason": "The project uses several older dependency versions (Jersey 1.19.4, Jackson 2.12.6, swagger-annotations 1.6.3, JUnit 4.13.2, maven-surefire-plugin 2.12) that may contain known CVEs. Remediating these ensures the library is secure and maintainable.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, the current version, the upgraded major version, and the breaking change risk. Verify that the project builds and all tests pass after remediation.",
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true"
+      },
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "planName": "mod-plan",
+    "projectName": "docraptor-java",
+    "language": "java",
+    "createdAt": "2026-08-06T13:30:00Z",
+    "version": "1.0"
+  }
+}
